@@ -10,11 +10,12 @@ import (
 type TodolistHandler interface {
 	Create(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
+	UpdateTodolistItem(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 	FindById(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
 	FindByUserId(c *fiber.Ctx) error
-	FindByCategory(c *fiber.Ctx) error
+	FindByCategoryId(c *fiber.Ctx) error
 }
 
 type TodolistHandlerImpl struct {
@@ -30,8 +31,9 @@ func NewTodolistHandler(db *gorm.DB) TodolistHandler {
 
 func (handler *TodolistHandlerImpl) Create(c *fiber.Ctx) error
 func (handler *TodolistHandlerImpl) Update(c *fiber.Ctx) error
+func (handler *TodolistHandlerImpl) UpdateTodolistItem(c *fiber.Ctx) error
 func (handler *TodolistHandlerImpl) Delete(c *fiber.Ctx) error
 func (handler *TodolistHandlerImpl) FindById(c *fiber.Ctx) error
 func (handler *TodolistHandlerImpl) FindAll(c *fiber.Ctx) error
 func (handler *TodolistHandlerImpl) FindByUserId(c *fiber.Ctx) error
-func (handler *TodolistHandlerImpl) FindByCategory(c *fiber.Ctx) error
+func (handler *TodolistHandlerImpl) FindByCategoryId(c *fiber.Ctx) error
