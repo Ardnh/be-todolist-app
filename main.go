@@ -5,7 +5,7 @@ import (
 	"todolist-app/app"
 	"todolist-app/helper"
 
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 )
 

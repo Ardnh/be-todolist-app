@@ -11,3 +11,13 @@ type RegisterRequest struct {
 	Email    string
 	Password string
 }
+
+type LoginRequest struct {
+	Username string
+	Password string
+}
+
+type FollowUser struct {
+	FollowingUserID int
+	FollowedUserID  int
+}
