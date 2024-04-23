@@ -10,6 +10,10 @@ import (
 type UsersHandler interface {
 	Login(c *fiber.Ctx) error
 	Register(c *fiber.Ctx) error
+	FindFollowersByUserId(c *fiber.Ctx) error
+	FindFollowingByUserId(c *fiber.Ctx) error
+	FindUserProfileById(c *fiber.Ctx) error
+	UpdateProfileById(c *fiber.Ctx) error
 }
 
 type UsersHandlerImpl struct {
@@ -36,5 +40,37 @@ func (handler *UsersHandlerImpl) Register(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{
 		"code":    200,
 		"message": "Hello from register",
+	})
+}
+
+func (handler *UsersHandlerImpl) FindFollowersByUserId(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from Find followers by id",
+	})
+}
+
+func (handler *UsersHandlerImpl) FindFollowingByUserId(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from find following by id",
+	})
+}
+
+func (handler *UsersHandlerImpl) FindUserProfileById(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code": 200,
+		"message": "Hello from"
+	})
+}
+
+func (handler *UsersHandlerImpl) UpdateProfileById(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from find following by id",
 	})
 }

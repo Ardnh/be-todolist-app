@@ -26,8 +26,37 @@ func NewCategoryHandler(db *gorm.DB) CategoryHandler {
 	}
 }
 
-func (handler *CategoryHandlerImpl) Create(c *fiber.Ctx) error
-func (handler *CategoryHandlerImpl) Update(c *fiber.Ctx) error
-func (handler *CategoryHandlerImpl) Delete(c *fiber.Ctx) error
-func (handler *CategoryHandlerImpl) FindAll(c *fiber.Ctx) error
-func (handler *CategoryHandlerImpl) FindById(c *fiber.Ctx) error
+func (handler *CategoryHandlerImpl) Create(c *fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from register",
+	})
+}
+
+func (handler *CategoryHandlerImpl) Update(c *fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from register",
+	})
+}
+
+func (handler *CategoryHandlerImpl) Delete(c *fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from register",
+	})
+}
+
+func (handler *CategoryHandlerImpl) FindAll(c *fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from register",
+	})
+}
+
+func (handler *CategoryHandlerImpl) FindById(c *fiber.Ctx) error {
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from register",
+	})
+}
