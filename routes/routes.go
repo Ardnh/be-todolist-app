@@ -46,6 +46,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	categoryGroup := appGroup.Group("category")
 	categoryGroup.Post("/", categoryHandler.Create)
 	categoryGroup.Put("/", categoryHandler.Update)
+	categoryGroup.Delete("/", categoryHandler.Delete)
+	categoryGroup.Get("/", categoryHandler.FindAll)
+	categoryGroup.Get("/:categoryId", categoryHandler.FindById)
 
 	// Super admin
 

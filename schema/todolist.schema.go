@@ -1,9 +1,9 @@
-package model
+package schema
 
 import "gorm.io/gorm"
 
 type Todolist struct {
-	gorm.Model
+	*gorm.Model
 	UserID     int
 	CategoryID int
 	Title      string
@@ -11,14 +11,14 @@ type Todolist struct {
 }
 
 type TodolistItem struct {
-	gorm.Model
+	*gorm.Model
 	TodolistID int
 	Todo       string
 	IsDone     bool
 }
 
 type FollowsTodolist struct {
-	gorm.Model
+	*gorm.Model
 	FollowingUserID    int
 	FollowedTodolistID int
 }

@@ -62,8 +62,8 @@ func (handler *UsersHandlerImpl) FindFollowingByUserId(c *fiber.Ctx) error {
 func (handler *UsersHandlerImpl) FindUserProfileById(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{
-		"code": 200,
-		"message": "Hello from"
+		"code":    200,
+		"message": "Hello from",
 	})
 }
 

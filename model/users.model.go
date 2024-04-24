@@ -1,10 +1,18 @@
 package model
 
-import "gorm.io/gorm"
-
 type User struct {
-	gorm.Model
 	Username string
 	Email    string
+	Password string
+}
+
+type RegisterRequest struct {
+	Username string
+	Email    string
+	Password string
+}
+
+type LoginRequest struct {
+	Username string
 	Password string
 }

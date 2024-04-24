@@ -1,9 +1,9 @@
 package app
 
 import (
-	"fmt"
-	"todolist-app/config"
+	"os"
 	"todolist-app/helper"
+	"todolist-app/schema"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,13 +11,19 @@ import (
 
 func DbConnection() *gorm.DB {
 
-	dbConfig := config.DbConfig()
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	postgresDsn := os.Getenv("APP_DSN")
+	db, err := gorm.Open(postgres.Open(postgresDsn), &gorm.Config{})
 
 	helper.PanicIfError(err)
+
+	db.AutoMigrate(
+		&schema.Category{},
+		&schema.Todolist{},
+		&schema.TodolistItem{},
+		&schema.FollowsTodolist{},
+		&schema.UserProfile{},
+		&schema.FollowUser{},
+	)
 
 	return db
 }
