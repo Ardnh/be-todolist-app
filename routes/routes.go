@@ -6,22 +6,27 @@ import (
 	"todolist-app/handler/todolist"
 	"todolist-app/handler/users"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB) {
+func SetupRoutes(app *fiber.App, db *gorm.DB, validate *validator.Validate) {
 
 	app.Use(func(c *fiber.Ctx) error {
 		fmt.Printf("Request: %s %s \n", c.Method(), c.OriginalURL())
 		return c.Next()
 	})
 
-	userHandler := users.NewUsersHandler(db)
-	categoryHandler := category.NewCategoryHandler(db)
-	todolistHandler := todolist.NewTodolistHandler(db)
+	userHandler := users.NewUsersHandler(db, validate)
+	categoryHandler := category.NewCategoryHandler(db, validate)
+	todolistHandler := todolist.NewTodolistHandler(db, validate)
 
-	appGroup := app.Group("api/v1")
+	appGroup := app.Group("/api/v1")
+
+	// Swagger
+	appGroup.Get("/swagger/*", swagger.HandlerDefault)
 
 	// Users
 	usersGroup := appGroup.Group("user")
@@ -30,6 +35,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	usersGroup.Get("/followers", userHandler.FindFollowersByUserId)
 	usersGroup.Get("/following", userHandler.FindFollowingByUserId)
 	usersGroup.Put("/profile/:userId", userHandler.UpdateProfileById)
+	usersGroup.Post("/following", userHandler.CreateFollowUserById)
+	usersGroup.Delete("/following", userHandler.DeleteFollowUserById)
 
 	// Todolist
 	todolistGroup := appGroup.Group("todolist")
@@ -48,8 +55,5 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	categoryGroup.Put("/", categoryHandler.Update)
 	categoryGroup.Delete("/", categoryHandler.Delete)
 	categoryGroup.Get("/", categoryHandler.FindAll)
-	categoryGroup.Get("/:categoryId", categoryHandler.FindById)
-
-	// Super admin
 
 }

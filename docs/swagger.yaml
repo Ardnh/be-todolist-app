@@ -1,0 +1,473 @@
+basePath: /api/v1
+definitions:
+  model.CategoryCreateRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  model.CategoryUpdateRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  model.FollowUserCreateRequest:
+    properties:
+      targetId:
+        type: string
+      userId:
+        type: string
+    type: object
+  model.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UserUpdateRequest:
+    properties:
+      bio:
+        type: string
+      facebook:
+        type: string
+      instagram:
+        type: string
+      linkedIn:
+        type: string
+      role:
+        type: string
+      twitter:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: ardn.h79@gmail.com
+    name: Muhammad Ardan Hilal
+    url: ardn.h79@gmail.com
+  description: API Documentation for Todolist API.
+  title: Todolist API
+  version: "1.0"
+paths:
+  /api/v1/category:
+    post:
+      consumes:
+      - application/json
+      description: Create a new category
+      parameters:
+      - description: Create category
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CategoryCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success create category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Create category
+      tags:
+      - Category
+  /api/v1/category/:
+    get:
+      consumes:
+      - application/json
+      description: Get all category
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all category
+      tags:
+      - Category
+  /api/v1/category/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete category
+      parameters:
+      - description: category_id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Delete category
+      tags:
+      - Category
+    put:
+      consumes:
+      - application/json
+      description: Update category
+      parameters:
+      - description: category_id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update category
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CategoryUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Update category
+      tags:
+      - Category
+  /api/v1/user/followers:
+    delete:
+      consumes:
+      - application/json
+      description: Unfollow user
+      parameters:
+      - description: following_id
+        in: path
+        name: following_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Unfollow user
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create follow user by id
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Follow user by id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.FollowUserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create follow user by id
+      tags:
+      - Users
+  /api/v1/user/followers/:user_id:
+    get:
+      consumes:
+      - application/json
+      description: Find follower by user id
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Find follower by user id
+      tags:
+      - Users
+  /api/v1/user/following:
+    get:
+      consumes:
+      - application/json
+      description: Find user profile by id
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Find user profile by id
+      tags:
+      - Users
+  /api/v1/user/following/:user_id:
+    get:
+      consumes:
+      - application/json
+      description: Find following by user id
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Find following by user id
+      tags:
+      - Users
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user
+      parameters:
+      - description: Login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login user
+      tags:
+      - Users
+  /api/v1/user/profile/:userId:
+    put:
+      consumes:
+      - application/json
+      description: Update profile by id
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Update profile
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update profile by id
+      tags:
+      - Users
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user
+      parameters:
+      - description: Login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success update category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register user
+      tags:
+      - Users
+swagger: "2.0"

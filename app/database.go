@@ -23,6 +23,7 @@ func DbConnection() *gorm.DB {
 		&schema.FollowsTodolist{},
 		&schema.UserProfile{},
 		&schema.FollowUser{},
+		&schema.Users{},
 	)
 
 	return db

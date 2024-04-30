@@ -3,6 +3,7 @@ package todolist
 import (
 	todolistRepository "todolist-app/repository/todolist"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -20,12 +21,14 @@ type TodolistHandler interface {
 
 type TodolistHandlerImpl struct {
 	TodolistRepository todolistRepository.TodolistRepository
+	Validate           *validator.Validate
 }
 
-func NewTodolistHandler(db *gorm.DB) TodolistHandler {
+func NewTodolistHandler(db *gorm.DB, validator *validator.Validate) TodolistHandler {
 	repository := todolistRepository.NewTodolistRepository(db)
 	return &TodolistHandlerImpl{
 		TodolistRepository: repository,
+		Validate:           validator,
 	}
 }
 

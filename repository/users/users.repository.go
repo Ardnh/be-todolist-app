@@ -2,13 +2,12 @@ package users
 
 import (
 	"todolist-app/model"
-	"todolist-app/types"
 
 	"gorm.io/gorm"
 )
 
 type UsersRepository interface {
-	Register(req types.RegisterRequest) error
+	Register(req model.RegisterRequest) error
 	FindByUsernameOrEmail(req string, isEmail bool) (*model.User, error)
 }
 
@@ -23,7 +22,7 @@ func NewUsersRepository(db *gorm.DB) UsersRepository {
 	}
 }
 
-func (repository *UsersRepositoryImpl) Register(req types.RegisterRequest) error {
+func (repository *UsersRepositoryImpl) Register(req model.RegisterRequest) error {
 
 	return nil
 }
