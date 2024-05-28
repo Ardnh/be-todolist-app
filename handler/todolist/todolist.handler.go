@@ -17,6 +17,8 @@ type TodolistHandler interface {
 	FindAll(c *fiber.Ctx) error
 	FindTodolistByUserId(c *fiber.Ctx) error
 	FindTodolistByCategoryId(c *fiber.Ctx) error
+	FollowTodolistByTodolistId(c *fiber.Ctx) error
+	UnfollowTodolistByTodolistId(c *fiber.Ctx) error
 }
 
 type TodolistHandlerImpl struct {
@@ -89,6 +91,22 @@ func (handler *TodolistHandlerImpl) FindTodolistByUserId(c *fiber.Ctx) error {
 }
 
 func (handler *TodolistHandlerImpl) FindTodolistByCategoryId(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from todolist by category id",
+	})
+}
+
+func (handler *TodolistHandlerImpl) FollowTodolistByTodolistId(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"code":    200,
+		"message": "Hello from todolist by category id",
+	})
+}
+
+func (handler *TodolistHandlerImpl) UnfollowTodolistByTodolistId(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{
 		"code":    200,

@@ -11,7 +11,7 @@ type Users struct {
 
 type UserProfile struct {
 	*gorm.Model
-	UserId    int
+	UserID    int
 	Bio       string
 	Role      string
 	Facebook  string
@@ -20,8 +20,8 @@ type UserProfile struct {
 	twitter   string
 }
 
-type FollowUser struct {
+type FollowUsers struct {
 	*gorm.Model
-	FollowingUserID int
-	FollowedUserID  int
+	UserID       int
+	FollowUserID int
 }

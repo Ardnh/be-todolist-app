@@ -48,12 +48,14 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, validate *validator.Validate) {
 	todolistGroup.Get("/", todolistHandler.FindAll)
 	todolistGroup.Get("/:userId", todolistHandler.FindTodolistByUserId)
 	todolistGroup.Get("/categoryId", todolistHandler.FindTodolistByCategoryId)
+	todolistGroup.Post("/follow/:todolistId", todolistHandler.FollowTodolistByTodolistId)
+	todolistGroup.Delete("/follow/:todolistId", todolistHandler.UnfollowTodolistByTodolistId)
 
 	// Category
 	categoryGroup := appGroup.Group("category")
 	categoryGroup.Post("/", categoryHandler.Create)
 	categoryGroup.Put("/", categoryHandler.Update)
-	categoryGroup.Delete("/", categoryHandler.Delete)
+	categoryGroup.Delete("/:id", categoryHandler.Delete)
 	categoryGroup.Get("/", categoryHandler.FindAll)
 
 }

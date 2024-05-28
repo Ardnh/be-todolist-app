@@ -12,7 +12,6 @@ type CategoryCreateRequest struct {
 }
 
 type CategoryUpdateRequest struct {
-	Id   int    `json:"id" validate:"required,number"`
 	Name string `json:"name" validate:"required"`
 }
 

@@ -41,7 +41,7 @@ func NewCategoryHandler(db *gorm.DB, validate *validator.Validate) CategoryHandl
 // @Success 200 {object} map[string]interface{} "Success create category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/category [post]
+// @Router /category [post]
 // @Security Bearer
 func (handler *CategoryHandlerImpl) Create(c *fiber.Ctx) error {
 
@@ -88,17 +88,26 @@ func (handler *CategoryHandlerImpl) Create(c *fiber.Ctx) error {
 // @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path string true "category_id"
 // @Param body body model.CategoryUpdateRequest true "Update category"
 // @Success 200 {object} map[string]interface{} "Success update category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/category/:id [put]
+// @Router /category/{} [put]
 // @Security Bearer
 func (handler *CategoryHandlerImpl) Update(c *fiber.Ctx) error {
 
 	// Read body request
 	var request model.CategoryUpdateRequest
+	idString := c.Params("id", "")
+	idInt, errConv := strconv.Atoi(idString)
+
+	if errConv != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
+			"message": errConv.Error(),
+		})
+	}
+
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -120,7 +129,7 @@ func (handler *CategoryHandlerImpl) Update(c *fiber.Ctx) error {
 		Name: request.Name,
 	}
 
-	errResult := handler.CategoryRepository.Update(c, request.Id, updateRequest)
+	errResult := handler.CategoryRepository.Update(c, idInt, updateRequest)
 	if errResult != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -140,33 +149,25 @@ func (handler *CategoryHandlerImpl) Update(c *fiber.Ctx) error {
 // @Tags Category
 // @Accept json
 // @Produce json
-// @Param id path string true "category_id"
+// @Param id path string true "category id"
 // @Success 200 {object} map[string]interface{} "Success update category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/category/:id [delete]
+// @Router /category/{id} [delete]
 // @Security Bearer
 func (handler *CategoryHandlerImpl) Delete(c *fiber.Ctx) error {
 
 	// Read body request
-	var request model.CategoryDeleteRequest
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
+	idString := c.Params("id")
+	idInt, err := strconv.Atoi(idString)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
 			"message": err.Error(),
 		})
 	}
 
-	// Validate incoming request
-	errValidate := handler.Validator.Struct(&request)
-	if errValidate != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"code":    fiber.StatusBadRequest,
-			"message": errValidate.Error(),
-		})
-	}
-
-	errResult := handler.CategoryRepository.Delete(c, request.Id)
+	errResult := handler.CategoryRepository.Delete(c, idInt)
 	if errResult != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -186,10 +187,13 @@ func (handler *CategoryHandlerImpl) Delete(c *fiber.Ctx) error {
 // @Tags Category
 // @Accept json
 // @Produce json
+// @Param page path string false "page"
+// @Param pageSize path string false "pageSize"
+// @Param categoryName path string false "categoryName"
 // @Success 200 {object} map[string]interface{} "Success update category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/category/ [get]
+// @Router /category/ [get]
 // @Security Bearer
 func (handler *CategoryHandlerImpl) FindAll(c *fiber.Ctx) error {
 
@@ -208,7 +212,7 @@ func (handler *CategoryHandlerImpl) FindAll(c *fiber.Ctx) error {
 	}
 
 	totalPages := int(totalEntries) / pageSizeInt
-	if int(totalEntries)%pageSizeInt > 0 { // Tambahkan satu halaman jika ada sisa pembagian
+	if int(totalEntries) % pageSizeInt > 0 { // Tambahkan satu halaman jika ada sisa pembagian
 		totalPages++
 	}
 

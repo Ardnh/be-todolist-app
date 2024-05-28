@@ -26,7 +26,7 @@ func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 	}
 }
 
-var tableName = "category"
+var tableName = "categories"
 
 func (repository *CategoryRepositoryImpl) Create(ctx *fiber.Ctx, req *model.Category) error {
 
@@ -92,7 +92,7 @@ func (repository *CategoryRepositoryImpl) FindAll(ctx *fiber.Ctx, page int, page
 	offset := (page - 1) * pageSize
 
 	// Query
-	query := tx.WithContext(ctx.Context())
+	query := tx.WithContext(ctx.Context()).Table(tableName)
 
 	if searchQuery != "" {
 		query = query.Where("category LIKE ? ", "%"+searchQuery+"%")

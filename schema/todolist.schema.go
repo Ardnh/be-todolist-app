@@ -19,6 +19,6 @@ type TodolistItem struct {
 
 type FollowsTodolist struct {
 	*gorm.Model
-	FollowingUserID    int
-	FollowedTodolistID int
+	UserID           int
+	FollowTodolistID int
 }

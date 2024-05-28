@@ -22,7 +22,7 @@ func DbConnection() *gorm.DB {
 		&schema.TodolistItem{},
 		&schema.FollowsTodolist{},
 		&schema.UserProfile{},
-		&schema.FollowUser{},
+		&schema.FollowUsers{},
 		&schema.Users{},
 	)
 
