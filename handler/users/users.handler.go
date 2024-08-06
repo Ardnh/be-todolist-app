@@ -16,12 +16,9 @@ import (
 type UsersHandler interface {
 	Login(c *fiber.Ctx) error
 	Register(c *fiber.Ctx) error
-	FindFollowersByUserId(c *fiber.Ctx) error
-	FindFollowingByUserId(c *fiber.Ctx) error
 	FindUserProfileById(c *fiber.Ctx) error
 	UpdateProfileById(c *fiber.Ctx) error
-	CreateFollowUserById(c *fiber.Ctx) error
-	DeleteFollowUserById(c *fiber.Ctx) error
+	GetProfileById(c *fiber.Ctx) error
 }
 
 type UsersHandlerImpl struct {
@@ -76,6 +73,8 @@ func (handler *UsersHandlerImpl) Login(c *fiber.Ctx) error {
 			"message": errUserFindByEmail.Error(),
 		})
 	}
+
+	fmt.Println(userResult)
 
 	// compare password from body request and from database
 	errComparePassword := helper.CheckPasswordHash(request.Password, userResult.Password)
@@ -160,79 +159,36 @@ func (handler *UsersHandlerImpl) Register(c *fiber.Ctx) error {
 		Password: request.Password,
 	}
 
-	errRegister := handler.UsersRepository.Register(c, &req)
-	if errRegister != nil {
+	userId, errRegister := handler.UsersRepository.Register(c, &req)
+	if errRegister != nil && userId == nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
 			"message": err.Error(),
+		})
+	}
+
+	defaultDataToProfile := model.ProfileCreateRequest{
+		UserId:    req.ID,
+		Bio:       "",
+		Role:      "",
+		Facebook:  "",
+		Instagram: "",
+		Linkedin:  "",
+		Twitter:   "",
+	}
+
+	errProfile := handler.UsersRepository.CreatUserProfileById(c, &defaultDataToProfile)
+
+	if errProfile != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": errProfile.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"code":    fiber.StatusOK,
 		"message": "Successfully register user",
-	})
-}
-
-// Find follower by user id
-// @Summary Find follower by user id
-// @Description Find follower by user id
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param user_id path string true "user_id"
-// @Success 200 {object} map[string]interface{} "Success update category"
-// @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /user/followers [get]
-func (handler *UsersHandlerImpl) FindFollowersByUserId(c *fiber.Ctx) error {
-
-	// desc: find account that follow your account by your user id
-	// 1. get userId from jwt token
-	var userId uint = helper.UserId
-	fmt.Println(userId)
-	page := c.Query("page", "1")
-	pageInt, _ := strconv.Atoi(page)
-	pageSize := c.Query("pageSize", "100")
-	pageSizeInt, _ := strconv.Atoi(pageSize)
-	username := c.Query("username", "")
-
-	// 2. get follower from repository
-	result, totalEntries, err := handler.UsersRepository.FindFollowersByUserId(c, userId, pageInt, pageSizeInt, username)
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
-			"message": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"code":       fiber.StatusOK,
-		"message":    "Success get followers",
-		"page":       page,
-		"pageSize":   pageSize,
-		"totalPages": totalEntries,
-		"data":       result,
-	})
-}
-
-// Find following by user id
-// @Summary Find following by user id
-// @Description Find following by user id
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param user_id path string true "user_id"
-// @Success 200 {object} map[string]interface{} "Success update category"
-// @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/user/following/:user_id [get]
-func (handler *UsersHandlerImpl) FindFollowingByUserId(c *fiber.Ctx) error {
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"code":    fiber.StatusOK,
-		"message": "Hello from find following by id",
 	})
 }
 
@@ -246,11 +202,11 @@ func (handler *UsersHandlerImpl) FindFollowingByUserId(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{} "Success update category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/user/following [get]
+// @Router /user/following [get]
 func (handler *UsersHandlerImpl) FindUserProfileById(c *fiber.Ctx) error {
 
-	return c.Status(200).JSON(fiber.Map{
-		"code":    200,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"code":    fiber.StatusOK,
 		"message": "Hello from",
 	})
 }
@@ -258,38 +214,20 @@ func (handler *UsersHandlerImpl) FindUserProfileById(c *fiber.Ctx) error {
 // Update profile by id
 // @Summary Update profile by id
 // @Description Update profile by id
+// @Security Bearer
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param user_id path string true "user_id"
-// @Param body body model.ProfileUpdateRequest true "Update profile"
+// @Param body body model.ProfileUpdateRequestBody true "Update profile"
 // @Success 200 {object} map[string]interface{} "Success update category"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/user/profile/:userId [put]
+// @Router /user/profile [put]
 func (handler *UsersHandlerImpl) UpdateProfileById(c *fiber.Ctx) error {
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"code":    fiber.StatusOK,
-		"message": "Hello from find following by id",
-	})
-}
+	var request model.ProfileUpdateRequestBody
+	userId := helper.UserId
 
-// Create follow user by id
-// @Summary Create follow user by id
-// @Description Create follow user by id
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param body body model.FollowUserCreateRequest true "Follow user by id"
-// @Success 200 {object} map[string]interface{} "Success update category"
-// @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /user/following [post]
-func (handler *UsersHandlerImpl) CreateFollowUserById(c *fiber.Ctx) error {
-
-	// 1. Parser body request
-	var request model.FollowUserCreateRequest
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -297,45 +235,70 @@ func (handler *UsersHandlerImpl) CreateFollowUserById(c *fiber.Ctx) error {
 		})
 	}
 
-	// 2. Validasi json yang dikirim
-	errValidate := handler.Validate.Struct(request)
-	if errValidate != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"code":    fiber.StatusBadRequest,
-			"message": errValidate.Error(),
-		})
+	reqData := model.ProfileUpdateRequest{
+		Bio:       request.Bio,
+		Role:      request.Role,
+		Facebook:  request.Facebook,
+		Instagram: request.Instagram,
+		Linkedin:  request.LinkedIn,
+		Twitter:   request.Twitter,
 	}
 
-	// 2. Create follow user
-	errCreate := handler.UsersRepository.CreateFollowUserById(c, request.UserId, request.TargetId)
-	if errCreate != nil {
+	err := handler.UsersRepository.UpdateProfileById(c, userId, reqData)
+
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
-			"message": errCreate.Error(),
+			"message": err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"code":    fiber.StatusOK,
-		"message": "successfully follow user",
+		"message": "Successfully update user profile",
 	})
 }
 
-// Unfollow user
-// @Summary Unfollow user
-// @Description Unfollow user
+// Get profile by id
+// @Summary Get profile by id
+// @Description Get profile by id
 // @Tags Users
-// @Accept json
 // @Produce json
-// @Param following_id path string true "following_id"
-// @Success 200 {object} map[string]interface{} "Success update category"
+// @Security Bearer
+// @Param userId path string true "userId"
+// @Success 200 {object} map[string]interface{} "Success get profile by id"
 // @Failure 400 {object} map[string]interface{} "Invalid request body or missing required fields"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/v1/user/followers [delete]
-func (handler *UsersHandlerImpl) DeleteFollowUserById(c *fiber.Ctx) error {
+// @Router /user/profile/:userId [get]
+func (handler *UsersHandlerImpl) GetProfileById(c *fiber.Ctx) error {
+	userId := c.Params("userId", "")
+
+	if userId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
+			"message": "Invalid user id",
+		})
+	}
+
+	userIdVal, err := strconv.ParseUint(userId, 10, 32) // basis 10, 32-bit
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"code":    fiber.StatusBadRequest,
+			"message": "Invalid user id",
+		})
+	}
+
+	result, err := handler.UsersRepository.GetProfileById(c, uint(userIdVal))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": err.Error(),
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"code":    fiber.StatusOK,
-		"message": "Hello from find following by id",
+		"message": "Successfully get profile",
+		"data":    result,
 	})
 }

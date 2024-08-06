@@ -9,12 +9,6 @@ type User struct {
 	Password string
 }
 
-type FollowUsers struct {
-	*gorm.Model
-	FollowingUserId int
-	FollowerUserId  int
-}
-
 type RegisterRequest struct {
 	Username string
 	Email    string
@@ -27,6 +21,7 @@ type LoginRequest struct {
 }
 
 type Profile struct {
+	*gorm.Model
 	UserId    int
 	Bio       string
 	Role      string
@@ -37,30 +32,36 @@ type Profile struct {
 }
 
 type UserWithProfile struct {
-	User
-	Profile
+	UserId         int
+	FollowedUserId int
+	Role           string
+	Username       string
 }
 
-type ProfileUpdateRequest struct {
-	UserId    int
+type ProfileUpdateRequestBody struct {
 	Bio       string
 	Role      string
 	Facebook  string
 	Instagram string
 	LinkedIn  string
+	Twitter   string
+}
+
+type ProfileUpdateRequest struct {
+	Bio       string
+	Role      string
+	Facebook  string
+	Instagram string
+	Linkedin  string
 	Twitter   string
 }
 
 type ProfileCreateRequest struct {
+	UserId    uint
 	Bio       string
 	Role      string
 	Facebook  string
 	Instagram string
-	LinkedIn  string
+	Linkedin  string
 	Twitter   string
-}
-
-type FollowUserCreateRequest struct {
-	UserId   int
-	TargetId int
 }

@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"todolist-app/helper"
 	"todolist-app/model"
@@ -12,13 +13,15 @@ import (
 
 type UsersRepository interface {
 	CreateFollowUserById(ctx *fiber.Ctx, userId int, userTargetId int) error
-	Register(ctx *fiber.Ctx, req *model.User) error
+	Register(ctx *fiber.Ctx, req *model.User) (*uint, error)
 	FindByUsernameOrEmail(ctx *fiber.Ctx, req string, isEmail bool) (*model.User, error)
 	FindByEmail(ctx *fiber.Ctx, email string) (*model.User, error)
+	CreatUserProfileById(ctx *fiber.Ctx, req *model.ProfileCreateRequest) error
 	FindFollowersByUserId(ctx *fiber.Ctx, userId uint, pageInt int, pageSizeInt int, username string) ([]model.UserWithProfile, int64, error)
 	// FindFollowingByUserId(ctx *fiber.Ctx, userId int) ([]*model.UserWithProfile, error)
 	// FindUserProfileById(ctx *fiber.Ctx, userId int) (*model.Profile, error)
-	// UpdateProfileById(ctx *fiber.Ctx, userId int, req model.ProfileUpdateRequest) error
+	UpdateProfileById(ctx *fiber.Ctx, userId uint, req model.ProfileUpdateRequest) error
+	GetProfileById(ctx *fiber.Ctx, userId uint) (*model.Profile, error)
 	// CreateFollowUserById(ctx *fiber.Ctx, userId int, userTargetId int) error
 	// DeleteFollowUserById(ctx *fiber.Ctx, followId int) error
 }
@@ -38,7 +41,26 @@ var tableUser = "users"
 var tableProfile = "user_profiles"
 var tableFollowers = "follow_users"
 
-func (repository *UsersRepositoryImpl) Register(ctx *fiber.Ctx, req *model.User) error {
+func (repository *UsersRepositoryImpl) GetProfileById(ctx *fiber.Ctx, userId uint) (*model.Profile, error) {
+
+	tx := repository.Db.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	var result model.Profile
+	err := tx.
+		WithContext(ctx.Context()).
+		Table(tableProfile).
+		Where("user_id = ?", userId).
+		Take(&result)
+
+	if err.Error != nil {
+		return nil, err.Error
+	}
+
+	return &result, nil
+}
+
+func (repository *UsersRepositoryImpl) Register(ctx *fiber.Ctx, req *model.User) (*uint, error) {
 
 	tx := repository.Db.Begin()
 	defer helper.CommitOrRollback(tx)
@@ -47,15 +69,13 @@ func (repository *UsersRepositoryImpl) Register(ctx *fiber.Ctx, req *model.User)
 	result := tx.
 		WithContext(ctx.Context()).
 		Table(tableUser).
-		Create(req)
+		Create(&req)
 
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
-	// 2. get created user id then insert to user_profile table
-
-	return nil
+	return &req.ID, nil
 }
 
 func (repository *UsersRepositoryImpl) FindByUsernameOrEmail(ctx *fiber.Ctx, req string, isEmail bool) (*model.User, error) {
@@ -113,7 +133,6 @@ func (repository *UsersRepositoryImpl) FindFollowersByUserId(ctx *fiber.Ctx, use
 
 	// Query
 	query := tx.WithContext(ctx.Context()).Table(tableFollowers)
-
 	if searchQuery != "" {
 		query = query.Where("username LIKE ? ", "%"+searchQuery+"%")
 	}
@@ -144,9 +163,21 @@ func (repository *UsersRepositoryImpl) FindFollowersByUserId(ctx *fiber.Ctx, use
 
 // }
 
-// func (repository *UsersRepositoryImpl) UpdateProfileById(userId int, req model.ProfileUpdateRequest) error {
+func (repository *UsersRepositoryImpl) UpdateProfileById(ctx *fiber.Ctx, userId uint, req model.ProfileUpdateRequest) error {
 
-// }
+	tx := repository.Db.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	fmt.Println(userId)
+
+	err := tx.WithContext(ctx.Context()).Table(tableProfile).Where("user_id = ?", userId).Updates(&req)
+
+	if err != nil {
+		return err.Error
+	}
+
+	return nil
+}
 
 func (repository *UsersRepositoryImpl) CreateFollowUserById(ctx *fiber.Ctx, userId int, userTargetId int) error {
 
@@ -154,11 +185,25 @@ func (repository *UsersRepositoryImpl) CreateFollowUserById(ctx *fiber.Ctx, user
 	defer helper.CommitOrRollback(tx)
 
 	queryData := model.FollowUsers{
-		FollowerUserId:  userId,
+		UserId:          userId,
 		FollowingUserId: userTargetId,
 	}
 
 	err := tx.WithContext(ctx.Context()).Table(tableFollowers).Create(&queryData).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *UsersRepositoryImpl) CreatUserProfileById(ctx *fiber.Ctx, req *model.ProfileCreateRequest) error {
+
+	tx := repository.Db.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	err := tx.WithContext(ctx.Context()).Table(tableProfile).Create(&req).Error
 
 	if err != nil {
 		return err

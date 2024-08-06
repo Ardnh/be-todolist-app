@@ -1,10 +1,10 @@
 package helper
 
 import (
-	"errors"
 	"os"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -12,6 +12,7 @@ var secretKey = []byte(os.Getenv("JWT_SECRECT_KEY"))
 var UserId uint
 
 func GenerateToken(userId uint) (string, error) {
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"userId": userId,
@@ -26,29 +27,44 @@ func GenerateToken(userId uint) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(c *fiber.Ctx) error {
+	tokenHeader := c.Get("Authorization", "")
+
+	if tokenHeader == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"code":    fiber.StatusUnauthorized,
+			"message": "Token not provided",
+		})
+	}
+
+	claims := jwt.MapClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenHeader, claims, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Failed to parse token",
+		})
 	}
 
 	if !token.Valid {
-		return errors.New("Token is invalid")
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"code":    fiber.StatusUnauthorized,
+			"message": "Token invalid",
+		})
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return errors.New("Invalid token claims")
-	}
-
-	if val, ok := claims["userId"].(uint); ok {
+	if val, ok := claims["userId"].(float64); ok {
 		UserId = uint(val)
 	} else {
-		return errors.New("user_id not found in token")
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"code":    fiber.StatusUnauthorized,
+			"message": "User id not found in token",
+		})
 	}
 
-	return nil
+	return c.Next()
 }

@@ -17,11 +17,11 @@ type UserProfile struct {
 	Facebook  string
 	Instagram string
 	Linkedin  string
-	twitter   string
+	Twitter   string
 }
 
 type FollowUsers struct {
 	*gorm.Model
-	UserID       int
-	FollowUserID int
+	UserID          int
+	FollowingUserID int
 }

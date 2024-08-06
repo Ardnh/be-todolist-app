@@ -3,8 +3,10 @@ package routes
 import (
 	"fmt"
 	"todolist-app/handler/category"
+	"todolist-app/handler/follow"
 	"todolist-app/handler/todolist"
 	"todolist-app/handler/users"
+	"todolist-app/helper"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +24,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, validate *validator.Validate) {
 	userHandler := users.NewUsersHandler(db, validate)
 	categoryHandler := category.NewCategoryHandler(db, validate)
 	todolistHandler := todolist.NewTodolistHandler(db, validate)
+	followHandler := follow.NewFollowHandler(db, validate)
 
 	appGroup := app.Group("/api/v1")
 
@@ -32,11 +35,14 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, validate *validator.Validate) {
 	usersGroup := appGroup.Group("user")
 	usersGroup.Post("/login", userHandler.Login)
 	usersGroup.Post("/register", userHandler.Register)
-	usersGroup.Get("/followers", userHandler.FindFollowersByUserId)
-	usersGroup.Get("/following", userHandler.FindFollowingByUserId)
-	usersGroup.Put("/profile/:userId", userHandler.UpdateProfileById)
-	usersGroup.Post("/following", userHandler.CreateFollowUserById)
-	usersGroup.Delete("/following", userHandler.DeleteFollowUserById)
+	usersGroup.Get("/profile/:user_id", helper.VerifyToken, userHandler.GetProfileById)
+	usersGroup.Put("/profile", helper.VerifyToken, userHandler.UpdateProfileById)
+
+	// Following / Follower
+	usersGroup.Post("/following", helper.VerifyToken, followHandler.CreateFollowingUserById)
+	usersGroup.Delete("/unfollow", helper.VerifyToken, followHandler.UnfollowUserById)
+	usersGroup.Get("/followers/:user_id", helper.VerifyToken, followHandler.FindFollowersByUserId)
+	usersGroup.Get("/following/:user_id", helper.VerifyToken, followHandler.FindFollowingByUserId)
 
 	// Todolist
 	todolistGroup := appGroup.Group("todolist")
